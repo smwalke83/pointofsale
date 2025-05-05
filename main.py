@@ -4,8 +4,7 @@ from functions import get_catalogue, remove_product, add_product, sales_mode, in
 
 def main():
     catalogue, product_list = get_catalogue()
-    mode = "Sales"
-    sales_mode()
+    sales_mode(catalogue, product_list)
 
 main()
 

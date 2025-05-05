@@ -15,6 +15,7 @@ class Product:
 class Catalogue:
     def __init__(self):
         self.dict = {}
+        self.sales = 0.0
 '''
 class Mode(Enum):
     SALES = "sales"
