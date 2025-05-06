@@ -1,5 +1,7 @@
-Item1, Item 1 Description, 11.11, 5, 1111111111
+Item 1, Item 1 Description, 11.1, 5, 1111111111
 Item2, Item 2 Description, 22.22, 10, 2222222222
 Item3, Item 3 Description, 33.33, 20, 3333333333
 Item4, Item 4 Description, 44.44, 1, 4444444444
 Item5, Item 5 Description, 55.55, 1000, 5555555555
+RemoveItem, Item to be removed, 66.66, 500, 6666666666
+New Item, Brand NEw ITem, 1.11, 50, 7777777777

@@ -7,7 +7,8 @@ class Product:
         self.price = price
         self.quantity = quantity
         self.UPC = UPC
-        self.is_flagged = False
+        self.is_low = False
+        self.is_out = False
     
     def __repr__(self):
         return f"Product Name: {self.name}, Description: {self.description}, Price: ${self.price}, Quantity: {self.quantity}, UPC: {self.UPC}"
@@ -16,11 +17,5 @@ class Catalogue:
     def __init__(self):
         self.dict = {}
         self.sales = 0.0
-'''
-class Mode(Enum):
-    SALES = "sales"
-    INV = "inventory"
-    RMV = "remove"
-    EXIT = "exit"
-'''
+
 
