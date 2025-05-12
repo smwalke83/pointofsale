@@ -4,5 +4,5 @@ Item3, Item 3 Description, 33.33, 19, 3333333333
 Item4, Item 4 Description, 44.44, 1, 4444444444
 Item5, Item 5 Description, 55.55, 1000, 5555555555
 RemoveItem, Item to be removed, 66.66, 500, 6666666666
-New Item, Brand NEw ITem, 1.11, 50, 7777777777
 Another new item, It's another new item, 10.0, 10, 9876543210
+Item 7, Seventh Item, 77.77, 77, 7777777777

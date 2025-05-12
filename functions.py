@@ -234,57 +234,101 @@ def inv_mode(catalogue, product_list, mode = "INV"):
             sys.stdout.flush()
             sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
             sys.stdout.write("Adding new item\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
             while add == True:
                 name = True
-                sys.stdout.write("Enter Item Name\n")
+                sys.stdout.write("Enter Item Name or CANCEL\n")
                 while name == True:
                     item_name = sys.stdin.readline().strip()
-                    name = False
+                    if item_name.upper() == "CANCEL":
+                        sys.stdout.write("Addition Cancelled\n")
+                        add = False
+                        name = False
+                    else:
+                        name = False
+                if add == False:
+                    break
                 description = True
-                sys.stdout.write("Enter Item Description\n")
+                sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                sys.stdout.write("Enter Item Description or CANCEL\n")
                 while description == True:
                     item_description = sys.stdin.readline().strip()
-                    description = False
+                    if item_description.upper() == "CANCEL":
+                        sys.stdout.write("Addition Cancelled\n")
+                        add = False
+                        description = False
+                    else:
+                        description = False
+                if add == False:
+                    break
                 price = True
-                sys.stdout.write("Enter Item Price\n")
+                sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                sys.stdout.write("Enter Item Price or CANCEL\n")
                 while price == True:
                     item_price = None
                     line = sys.stdin.readline().strip()
-                    try:
-                        item_price = float(line)
-                    except Exception:
-                        sys.stdout.write("Invalid Price - Please enter a numerical price value without dollar signs\n")
-                        sys.stdout.write("Enter Item Price\n")
-                    if item_price is not None:
+                    if line.upper() == "CANCEL":
+                        sys.stdout.write("Addition Cancelled\n")
+                        add = False
                         price = False
+                    else:
+                        try:
+                            item_price = float(line)
+                        except Exception:
+                            sys.stdout.write("Invalid Price - Please enter a numerical price value without dollar signs\n")
+                            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                            sys.stdout.write("Enter Item Price\n")
+                        if item_price is not None:
+                            price = False
+                if add == False:
+                    break
                 quantity = True
-                sys.stdout.write("Enter Item Quantity\n")
+                sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                sys.stdout.write("Enter Item Quantity or CANCEL\n")
                 while quantity == True:
                     item_quantity = None
                     line = sys.stdin.readline().strip()
-                    try:
-                        item_quantity = int(line)
-                    except Exception:
-                        sys.stdout.write("Invalid Input - Quantity must be an integer\n")
-                        sys.stdout.write("Enter Item Quantity\n")
-                    if item_quantity is not None:
-                        if item_quantity < 10:
-                            is_low = True
-                        else:
-                            is_low = False
-                        if item_quantity <= 0:
-                            is_out = True
-                        else:
-                            is_out = False
+                    if line.upper() == "CANCEL":
+                        sys.stdout.write("Addition Cancelled\n")
+                        add = False
                         quantity = False
+                    else:
+                        try:
+                            item_quantity = int(line)
+                        except Exception:
+                            sys.stdout.write("Invalid Input - Quantity must be an integer\n")
+                            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                            sys.stdout.write("Enter Item Quantity\n")
+                        if item_quantity is not None:
+                            if item_quantity < 10:
+                                is_low = True
+                            else:
+                                is_low = False
+                            if item_quantity <= 0:
+                                is_out = True
+                            else:
+                                is_out = False
+                            quantity = False
+                if add == False:
+                    break
                 UPC = True
-                sys.stdout.write("Enter Item UPC\n")
+                sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                sys.stdout.write("Enter Item UPC or CANCEL\n")
                 while UPC == True:
                     item_UPC = sys.stdin.readline().strip()
-                    if item_UPC not in catalogue.dict:
+                    if item_UPC.upper() == "CANCEL":
+                        sys.stdout.write("Addition Cancelled\n")
+                        add = False
                         UPC = False
                     else:
-                        sys.stdout.write("Invalid UPC - UPC matches existing item; UPCs must be unique\n")
+                        if item_UPC not in catalogue.dict:
+                            UPC = False
+                        else:
+                            sys.stdout.write("Invalid UPC - UPC matches existing item; UPCs must be unique\n")
+                            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                            sys.stdout.write("Enter Item UPC\n")
+                if add == False:
+                    break
                 add_product(item_name, item_description, item_price, item_quantity, item_UPC, product_list, catalogue, is_low, is_out)
                 sys.stdout.write(f"Product added: {catalogue.dict[item_UPC]}\n")
                 add = False
