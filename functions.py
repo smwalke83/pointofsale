@@ -1,5 +1,6 @@
 from classes import Product, Catalogue
 import sys
+import datetime
 
 def get_catalogue():
     file = open("./catalogue.txt")
@@ -7,7 +8,7 @@ def get_catalogue():
     file.close()
     content_list = content.split("\n")
     catalogue = Catalogue()
-    file = open("./sales.txt")
+    file = open("./total_sales.txt")
     content = file.read()
     file.close()
     if len(content) == 0:
@@ -69,9 +70,16 @@ def update_catalogue(product_list):
     file.close()
 
 def update_sales(catalogue):
-    file = open("./sales.txt", "w")
+    file = open("./total_sales.txt", "w")
     content = catalogue.sales
     file.write(str(content))
+    file.close()
+
+def update_sales_log(sale_total):
+    now = datetime.datetime.now()
+    file = open("./sales_log.txt", "a")
+    content = f"\n{sale_total:.2f} - {now}"
+    file.write(content)
     file.close()
 
 def sales_mode(catalogue, product_list, mode = "Sales"):
@@ -83,24 +91,76 @@ def sales_mode(catalogue, product_list, mode = "Sales"):
     sys.stdout.write("Commands are not case sensitive\n")
     sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
     sale_total = 0.0
+    sale_list = []
     while mode == "Sales":
         line = sys.stdin.readline().strip()
         if line.upper() == "INV":
+            sys.stdout.flush()
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sys.stdout.write("Transaction Cancelled\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sale_total = 0.0
+            sale_list = [] 
             mode = "INV"
         elif line.upper() == "RMV":
+            sys.stdout.flush()
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sys.stdout.write("Transaction Cancelled\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sale_total = 0.0
+            sale_list = []
             mode = "RMV"
         elif line.upper() == "EXIT":
+            sys.stdout.flush()
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sys.stdout.write("Transaction Cancelled\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sale_total = 0.0
+            sale_list = []
             mode = "Exit"
         elif line.upper() == "HELP":
             sys.stdout.flush()
             sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
             sys.stdout.write('Currently in Sales Mode\n')
             sys.stdout.write("Scan UPC of Sales Item\n")
+            sys.stdout.write('Type "CLOSE" to end the current transaction\n')
+            sys.stdout.write('Type "CANCEL" to cancel the current transaction\n')
             sys.stdout.write('Type "INV" to enter Inventory Management Mode\n')
             sys.stdout.write('Type "RMV" to enter Product Removal Mode\n')
             sys.stdout.write('Type "EXIT" to exit program\n')
             sys.stdout.write("Commands are not case sensitive\n")
             sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+        elif line.upper() == "CLOSE":
+            sys.stdout.flush()
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            for item in sale_list:
+                catalogue.dict[item.UPC].quantity -= 1
+                for product in product_list:
+                    if item.UPC in product:
+                        new_product = f"{catalogue.dict[item.UPC].name}, {catalogue.dict[item.UPC].description}, {catalogue.dict[item.UPC].price}, {catalogue.dict[item.UPC].quantity}, {catalogue.dict[item.UPC].UPC}"
+                        product_list[product_list.index(product)] = new_product
+                        break
+                if catalogue.dict[item.UPC].quantity < 10:
+                    catalogue.dict[item.UPC].is_low = True
+                    sys.stdout.write(f"Item flagged - Quantity below 10\n")
+                if catalogue.dict[item.UPC].quantity <= 0:
+                    catalogue.dict[item.UPC].is_out = True
+                    sys.stdout.write(f"Item flagged - Zero or below quantity\n")
+            update_catalogue(product_list)
+            catalogue.sales += sale_total
+            update_sales(catalogue)
+            sys.stdout.write(f"Transaction closed. Sale total: {sale_total:.2f}\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            update_sales_log(sale_total)
+            sale_total = 0.0
+            sale_list = []
+        elif line.upper() == "CANCEL":
+            sys.stdout.flush()
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sys.stdout.write("Transaction cancelled.\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            sale_total = 0.0
+            sale_list = []
         else:
             if line not in catalogue.dict:
                 sys.stdout.flush()
@@ -111,24 +171,12 @@ def sales_mode(catalogue, product_list, mode = "Sales"):
                 sys.stdout.flush()
                 sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
                 sys.stdout.write(f"Input: {line}\n")
-                catalogue.dict[line].quantity -= 1
                 sys.stdout.write(f"{catalogue.dict[line]}\n")
                 sale_total += catalogue.dict[line].price
-                catalogue.sales += catalogue.dict[line].price
-                for product in product_list:
-                    if line in product:
-                        new_product = f"{catalogue.dict[line].name}, {catalogue.dict[line].description}, {catalogue.dict[line].price}, {catalogue.dict[line].quantity}, {catalogue.dict[line].UPC}"
-                        product_list[product_list.index(product)] = new_product
-                        break
-                update_catalogue(product_list)
-                update_sales(catalogue)
-                if catalogue.dict[line].quantity < 10:
-                    catalogue.dict[line].is_low = True
-                    sys.stdout.write(f"Item flagged - Quantity below 10\n")
-                if catalogue.dict[line].quantity <= 0:
-                    catalogue.dict[line].is_out = True
-                    sys.stdout.write(f"Item flagged - Zero or below quantity\n")
-                sys.stdout.write(f"Sale Total: {sale_total}\n")
+                sale_list.append(catalogue.dict[line])
+                sys.stdout.write(f"Sale Total: {sale_total:.2f}\n")
+                sys.stdout.write("Type CLOSE to end the current transaction\n")
+                sys.stdout.write("Type CANCEL to cancel the current transaction\n")
                 sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
     if mode == "INV":
         inv_mode(catalogue, product_list)
@@ -160,7 +208,7 @@ def inv_mode(catalogue, product_list, mode = "INV"):
             sys.stdout.write('Currently in Inventory Managment Mode\n')
             sys.stdout.write("Scan UPC or search for existing item\n")
             sys.stdout.write('Type "ADD" to add new product\n')
-            sys.stdout.write("Type FLAGS to see low quantity items\n")
+            sys.stdout.write('Type "FLAGS" to see low quantity items\n')
             sys.stdout.write('Type "SALES" to enter Sales Mode\n')
             sys.stdout.write('Type "RMV" to enter Product Removal Mode\n')
             sys.stdout.write('Type "EXIT" to exit program\n')
@@ -179,7 +227,8 @@ def inv_mode(catalogue, product_list, mode = "INV"):
             sys.stdout.write("Flagged Items:\n")
             sys.stdout.write(f"{flag_string}\n")
             sys.stdout.write("Enter UPC or search item to update quantities\n")
-            sys.stdout.write("Enter HELP for more options")
+            sys.stdout.write("Enter HELP for more options\n")
+            sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
         elif line.upper() == "ADD":
             add = True
             sys.stdout.flush()
@@ -253,7 +302,7 @@ def inv_mode(catalogue, product_list, mode = "INV"):
                     line = sys.stdin.readline().strip()
                     if line.upper() == "N":
                         name = True
-                        sys.stdout.write("Enter new Name\n")
+                        sys.stdout.write("Enter New Name\n")
                         while name == True:
                             line = sys.stdin.readline().strip()
                             catalogue.dict[UPC].name = line
@@ -263,17 +312,17 @@ def inv_mode(catalogue, product_list, mode = "INV"):
                         alter = False
                     elif line.upper() == "D":
                         description = True
-                        sys.stdout.write("Enter new Description\n")
+                        sys.stdout.write("Enter New Description\n")
                         while description == True:
                             line = sys.stdin.readline().strip()
                             catalogue.dict[UPC].description = line
-                            sys.stdin.write("Description Changed\n")
+                            sys.stdout.write("Description Changed\n")
                             update_product(product_list, catalogue, UPC)
                             description = False
                         alter = False
                     elif line.upper() == "P":
                         price = True
-                        sys.stdout.write("Enter new Price\n")
+                        sys.stdout.write("Enter New Price\n")
                         while price == True:
                             new_price = None
                             line = sys.stdin.readline().strip()
@@ -281,7 +330,7 @@ def inv_mode(catalogue, product_list, mode = "INV"):
                                 new_price = float(line)
                             except Exception:
                                 sys.stdout.write("Invalid Price - Please enter a numerical price value without dollar signs\n")
-                                sys.stdout.write("Enter new Price\n")
+                                sys.stdout.write("Enter New Price\n")
                             if new_price is not None:
                                 catalogue.dict[UPC].price = new_price
                                 sys.stdout.write("Price Changed\n")
@@ -290,7 +339,7 @@ def inv_mode(catalogue, product_list, mode = "INV"):
                         alter = False
                     elif line.upper() == "Q":
                         quantity = True
-                        sys.stdout.write("Enter new Quantity\n")
+                        sys.stdout.write("Enter New Quantity\n")
                         while quantity == True:
                             new_quantity = None
                             line = sys.stdin.readline().strip()
@@ -298,7 +347,7 @@ def inv_mode(catalogue, product_list, mode = "INV"):
                                 new_quantity = int(line)
                             except Exception:
                                 sys.stdout.write("Invalid Input - Quantity must be an integer\n")
-                                sys.stdout.write("Enter new Quantity\n")
+                                sys.stdout.write("Enter New Quantity\n")
                             if new_quantity is not None:
                                 catalogue.dict[UPC].quantity = new_quantity
                                 if new_quantity >= 10:
@@ -314,14 +363,14 @@ def inv_mode(catalogue, product_list, mode = "INV"):
                                 quantity = False
                         alter = False
                     elif line.upper() == "UPC":
-                        UPC = True
-                        sys.stdout.write("Enter new UPC\n")
-                        while UPC == True:
+                        UPC_alter = True
+                        sys.stdout.write("Enter New UPC\n")
+                        while UPC_alter == True:
                             line = sys.stdin.readline().strip()
                             catalogue.dict[UPC].UPC = line
                             sys.stdout.write("UPC Changed\n")
                             update_product(product_list, catalogue, UPC, new_UPC = line)
-                            UPC = False
+                            UPC_alter = False
                         alter = False
                     elif line.upper() == "NONE":
                         sys.stdout.write("Nothing Changed\n")
@@ -375,7 +424,7 @@ def rmv_mode(catalogue, product_list, mode = "RMV"):
         elif line.upper() == "HELP":
             sys.stdout.write("~~~~~~~~~~~~~~~~~~~~~~~~~\n")
             sys.stdout.write('Currently in Product Removal Mode\n')
-            sys.stdout.write("Scan UPC of item to remove\n")
+            sys.stdout.write("Scan UPC of item to remove OR Search for item\n")
             sys.stdout.write('Type "SALES" to enter Sales Mode\n')
             sys.stdout.write('Type "INV" to enter Inventory Management Mode\n')
             sys.stdout.write('Type "EXIT" to exit program\n')

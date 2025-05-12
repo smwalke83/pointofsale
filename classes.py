@@ -11,7 +11,7 @@ class Product:
         self.is_out = False
     
     def __repr__(self):
-        return f"Product Name: {self.name}, Description: {self.description}, Price: ${self.price}, Quantity: {self.quantity}, UPC: {self.UPC}"
+        return f"Product Name: {self.name}, Description: {self.description}, Price: ${self.price:.2f}, Quantity: {self.quantity}, UPC: {self.UPC}"
 
 class Catalogue:
     def __init__(self):
