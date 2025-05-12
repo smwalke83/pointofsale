@@ -70,9 +70,10 @@ def update_catalogue(product_list):
     file.close()
 
 def update_sales(catalogue):
-    file = open("./total_sales.txt", "w")
+    now = datetime.datetime.now()
+    file = open("./total_sales.txt", "a")
     content = catalogue.sales
-    file.write(str(content))
+    file.write(f"\n{str(content)} - {now}")
     file.close()
 
 def update_sales_log(sale_total):
